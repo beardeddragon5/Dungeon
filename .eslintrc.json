@@ -1,0 +1,41 @@
+{
+    "env": {
+        "es6": true,
+        "node": false
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [ "error", 2 ],
+        "linebreak-style": [ "error", "unix" ],
+        "quotes": [ "error", "single" ],
+        "semi": [ "error", "always" ],
+        "consistent-return": [ "warn" ],
+        "curly": ["error", "multi-line"],
+        "default-case": [ "error" ],
+        "eqeqeq": [ "error", "always" ],
+        "no-multi-spaces": [ "error" ],
+        "no-console": [ "off" ],
+        "no-unused-vars": [ "warn" ],
+        "no-fallthrough": [ "warn"],
+        "strict": [ "error" ],
+        "no-shadow": [ "error" ],
+        "camelcase": [ "error" ],
+        "comma-spacing": [ "error", { "before": false, "after": true } ],
+        "no-const-assign": [ "error" ],
+        "no-var": [ "error" ],
+        "prefer-arrow-callback": [ "error", { "allowUnboundThis": false }],
+        "prefer-const": [ "warn" ],
+        "prefer-rest-params": [ "error" ],
+        "prefer-spread": [ "error" ],
+        "dot-location": [ "error", "property" ],
+        "no-magic-numbers": [ "error", { "ignore": [1, 0] } ],
+        "no-self-assign": [ "error" ],
+        "no-self-compare": [ "error" ],
+        "no-throw-literal": [ "error" ],
+        "no-unmodified-loop-condition": [ "error" ],
+        "no-unused-expressions": [ "error" ],
+        "no-useless-call": [ "error" ],
+        "no-useless-concat": [ "error" ],
+        "no-void": [ "error" ]
+    }
+}
