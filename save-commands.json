@@ -1,0 +1,6 @@
+{
+  "commands": [
+    "*.js : ./deploy.sh {absPath}{filename} {relPath}{filename}",
+    "*.html : ./deploy.sh {absPath}{filename} {relPath}{filename}"
+  ]
+}

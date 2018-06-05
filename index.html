@@ -2,7 +2,6 @@
 <html>
   <head>
     <title> Dungeon Crawler 0.0.1 alpha </title>
-    <script src="./index.js"> </script>
     <style>
       html, body {
         overflow: hidden;
@@ -14,17 +13,41 @@
   <body>
     <canvas id="world"></canvas>
 
-    <script>
+    <script type="module">
+      import { Dungeon } from './index.js'
+
+      function browserSize() {
+       return {
+         width: window.innerWidth
+           || document.documentElement.clientWidth
+           || document.body.clientWidth,
+         height: window.innerHeight
+           || document.documentElement.clientHeight
+           || document.body.clientHeight
+       }
+      }
+
       let world = document.getElementById('world');
-      world.width = document.body.clientWidth; //document.width is obsolete
-      world.height = document.body.clientHeight; //document.height is obsolete
-
       let ctx = world.getContext('2d');
-      ctx.width = world.width;
-      ctx.height = world.height;
-
       let dungeon = new Dungeon();
+
+      const resize = (win) => {
+        const { width, height } = browserSize();
+        ctx.width = width;
+        ctx.height = height;
+
+        ctx.canvas.width = ctx.width;
+        ctx.canvas.height = ctx.height;
+
+        dungeon.onSizeUpdate(width, height);
+      };
       dungeon.setup(ctx);
+
+      window.addEventListener('resize', resize);
+      resize();
+    </script>
+    <script nomodule>
+      console.log('kdjsakfdsf');
     </script>
   </body>
 </html>
