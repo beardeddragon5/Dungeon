@@ -8,6 +8,7 @@ export class Dungeon {
 
   static get GRIDSIZE( ) { const g = 40; return g; }
   static get MS_PER_FRAME() { const g = 16; return g; }
+  static get SECOND_IN_MS() { const g = 1000; return g; }
 
   constructor() {
     this.currentLevel = new Level(this);
@@ -21,8 +22,10 @@ export class Dungeon {
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, ctx.width, ctx.height);
 
-      this.currentLevel.draw(ctx);
-      this.player.draw(ctx);
+      const tpf = Dungeon.MS_PER_FRAME / Dungeon.SECOND_IN_MS;
+
+      this.currentLevel.draw(ctx, tpf);
+      this.player.draw(ctx, tpf);
     }, Dungeon.MS_PER_FRAME);
   }
 

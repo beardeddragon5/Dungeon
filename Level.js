@@ -19,7 +19,7 @@ export class Level {
 
   generateLevel() {
     const CHANCE_FLOOR = 0.8;
-    
+
     this.world = [];
     this.world[this.spawn.x + this.spawn.y * this.width] = Level.SPAWN;
     for (let x = 0; x < this.width; x++) {
@@ -41,7 +41,7 @@ export class Level {
 
   }
 
-  draw(ctx) {
+  draw(ctx, tpf) {
     this.world.forEach((tile, idx) => {
       const x = idx % this.width;
       const y = Math.floor(idx / this.width);

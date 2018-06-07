@@ -1,12 +1,14 @@
 /* global window, location */
 
-import { vec } from './Vector.js'
+import { vec } from './Vector.js';
 
 export class Player {
 
   static get PROPWIDTH() { const g = 0.7; return g; }
   static get INPUT_UPDATE_INTERVAL() { const g = 150; return g; }
   static get GAME_OVER_TEXT() { return 'GAM3 0V3R'; }
+  static get MIN_VELOCITY() { const g = 0.5; return g; }
+  static get VELOCITY_SCALE() { const g = 9.81; return g; }
 
   static get W(){ const g = 87; return g; }
   static get S(){ const g = 83; return g; }
@@ -20,51 +22,41 @@ export class Player {
     this.maxHealth = 100;
     this.health = 100;
 
-    this.forward = false;
-    this.backward = false;
-    this.left = false;
-    this.right = false;
-    this.inputUpdate = false;
-
     this.newPos = this.pos.clone();
 
-    window.onkeyup = (e) => {
+    const onKeyDown = (e) => {
+      const levelSize = this.dungeon.currentLevel.width;
+      const newIndex = Math.trunc(this.newPos.x) + levelSize * Math.trunc(this.newPos.y);
+      const world = this.dungeon.currentLevel.world;
+
       switch(e.keyCode) {
       case Player.W:
-        this.forward = false;
+        if (world[newIndex - levelSize] && !world[newIndex - levelSize].solid) this.newPos.y--;
+        this.dungeon.update();
         break;
       case Player.S:
-        this.backward = false;
+        if (world[newIndex + levelSize] && !world[newIndex + levelSize].solid) this.newPos.y++;
+        this.dungeon.update();
         break;
       case Player.A:
-        this.left = false;
+        if (world[newIndex - 1] && !world[newIndex - 1].solid) this.newPos.x--;
+        this.dungeon.update();
         break;
       case Player.D:
-        this.right = false;
+        if (world[newIndex + 1] && !world[newIndex + 1].solid) this.newPos.x++;
+        this.dungeon.update();
         break;
       default:
         break;
       }
     };
 
+    let lastTime = 0;
     window.onkeydown = (e) => {
-      switch(e.keyCode) {
-      case Player.W:
-        this.forward = true;
-        break;
-      case Player.S:
-        this.backward = true;
-        break;
-      case Player.A:
-        this.left = true;
-        break;
-      case Player.D:
-        this.right = true;
-        break;
-      default:
-        break;
+      if (e.repeat || e.timeStamp - lastTime > 100) {
+        onKeyDown(e);
+        lastTime = e.timeStamp;
       }
-      this.inputUpdate = true;
     };
 
   }
@@ -79,26 +71,9 @@ export class Player {
     }
   }
 
-  draw(ctx) {
-    const levelSize = this.dungeon.currentLevel.width;
-    let index = Math.trunc(this.pos.x) + levelSize * Math.trunc(this.pos.y);
-    const world = this.dungeon.currentLevel.world;
-
+  draw(ctx, tpf) {
     const posDiff = this.newPos.clone().sub(this.pos).length(false);
-    if (posDiff > 0.001) {
-      this.pos = Math.lerp(this.pos, this.newPos, 10 * Math.max(posDiff, 0.4) * (16 / 1000));
-    }
-
-    if (this.inputUpdate) {
-      this.inputUpdate = false;
-      let newIndex = Math.trunc(this.newPos.x) + levelSize * Math.trunc(this.newPos.y);
-      if (this.forward && world[newIndex - levelSize] && !world[newIndex - levelSize].solid) this.newPos.y--;
-      if (this.backward && world[newIndex + levelSize] && !world[newIndex + levelSize].solid) this.newPos.y++;
-      if (this.left && world[newIndex - 1] && !world[newIndex - 1].solid) this.newPos.x--;
-      if (this.right && world[newIndex + 1] && !world[newIndex + 1].solid) this.newPos.x++;
-
-      this.dungeon.update();
-    }
+    this.pos = Math.lerp(this.pos, this.newPos, Player.VELOCITY_SCALE * Math.max(posDiff, Player.MIN_VELOCITY) * tpf);
 
     this.dungeon.grid.offset.x = ctx.width / 2 - this.pos.x * this.dungeon.grid.gridSize;
     this.dungeon.grid.offset.y = ctx.height / 2 - this.pos.y * this.dungeon.grid.gridSize;
@@ -115,7 +90,6 @@ export class Player {
     this.drawHealth(ctx);
 
     if (this.health <= 0) {
-      window.onkeyup = undefined;
       window.onkeydown = undefined;
       this.drawGameOver(ctx);
       window.onmouseup = (e) => {
