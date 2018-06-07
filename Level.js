@@ -8,7 +8,7 @@ export class Level {
 
   constructor(dungeon) {
     this.dungeon = dungeon;
-    this.width = 30;
+    this.width = 32;
     this.height = 10;
     this.spawn = {
       x: 4,
@@ -18,7 +18,7 @@ export class Level {
   }
 
   generateLevel() {
-    const CHANCE_FLOOR = 0.8;
+    const CHANCE_FLOOR = 1; // 0.8;
 
     this.world = [];
     this.world[this.spawn.x + this.spawn.y * this.width] = Level.SPAWN;

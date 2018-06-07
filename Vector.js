@@ -50,6 +50,21 @@ export class Vec {
     return Math.sqrt(this.length( true ));
   }
 
+  normalize() {
+    const length = this.length(false);
+    if (length === 0) {
+      return this;
+    }
+
+    this.x /= length;
+    this.y /= length;
+    return this;
+  }
+
+  cross(v) {
+    return this.x * v.y - this.y * v.x;
+  }
+
   clone() {
     return vec(this.x, this.y);
   }

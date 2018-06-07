@@ -18,15 +18,19 @@ export class Dungeon {
 
   setup(ctx) {
     ctx.fillRect(0, 0, ctx.width, ctx.height);
+    let lastTime = Date.now();
+    let tpf = 0;
     setInterval(() => {
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, ctx.width, ctx.height);
 
-      const tpf = Dungeon.MS_PER_FRAME / Dungeon.SECOND_IN_MS;
-
       this.currentLevel.draw(ctx, tpf);
       this.player.draw(ctx, tpf);
-    }, Dungeon.MS_PER_FRAME);
+
+      const now = Date.now();
+      tpf = (now - lastTime) / 1000;
+      lastTime = now;
+    }, 1);
   }
 
   onSizeUpdate(width, height) {

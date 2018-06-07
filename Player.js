@@ -7,8 +7,7 @@ export class Player {
   static get PROPWIDTH() { const g = 0.7; return g; }
   static get INPUT_UPDATE_INTERVAL() { const g = 150; return g; }
   static get GAME_OVER_TEXT() { return 'GAM3 0V3R'; }
-  static get MIN_VELOCITY() { const g = 0.5; return g; }
-  static get VELOCITY_SCALE() { const g = 9.81; return g; }
+  static get VELOCITY() { const g = 4; return g; }
 
   static get W(){ const g = 87; return g; }
   static get S(){ const g = 83; return g; }
@@ -51,14 +50,15 @@ export class Player {
       }
     };
 
-    let lastTime = 0;
+    const threshold = (1000 / Player.VELOCITY) * 0.9;
+    let lastTime = -threshold;
     window.onkeydown = (e) => {
-      if ((e.repeat && e.timeStamp - lastTime > 40) || e.timeStamp - lastTime > 100) {
+      const duration = (e.timeStamp - lastTime);
+      if (duration > threshold) {
         onKeyDown(e);
         lastTime = e.timeStamp;
       }
     };
-
   }
 
   update() {
@@ -72,8 +72,14 @@ export class Player {
   }
 
   draw(ctx, tpf) {
-    const posDiff = this.newPos.clone().sub(this.pos).length(false);
-    this.pos = Math.lerp(this.pos, this.newPos, Player.VELOCITY_SCALE * Math.max(posDiff, Player.MIN_VELOCITY) * tpf);
+    const deltaX = this.newPos.clone().sub(this.pos);
+    this.pos.add( deltaX.normalize().scale( Player.VELOCITY * tpf ) );
+
+    const afterDelta = this.newPos.clone().sub(this.pos);
+    const cross = Math.sign(deltaX.cross(afterDelta));
+    if ( Object.is(cross, -0) || Object.is(cross, -1) ) {
+      this.pos = this.newPos.clone();
+    }
 
     this.dungeon.grid.offset.x = ctx.width / 2 - this.pos.x * this.dungeon.grid.gridSize;
     this.dungeon.grid.offset.y = ctx.height / 2 - this.pos.y * this.dungeon.grid.gridSize;
