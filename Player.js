@@ -1,5 +1,7 @@
 /* global window, location */
 
+import { vec } from './Vector.js'
+
 export class Player {
 
   static get PROPWIDTH() { const g = 0.7; return g; }
@@ -14,8 +16,7 @@ export class Player {
   constructor(dungeon, x, y) {
     this.dungeon = dungeon;
     this.inventory = [];
-    this._x = x;
-    this._y = y;
+    this.pos = vec(x, y);
     this.maxHealth = 100;
     this.health = 100;
 
@@ -24,6 +25,8 @@ export class Player {
     this.left = false;
     this.right = false;
     this.inputUpdate = false;
+
+    this.newPos = this.pos.clone();
 
     window.onkeyup = (e) => {
       switch(e.keyCode) {
@@ -66,33 +69,9 @@ export class Player {
 
   }
 
-  set y(y) {
-    const oldY = this._y;
-    this._y = y;
-    if ( oldY !== y ) {
-      this.dungeon.update();
-    }
-  }
-
-  get y() {
-    return this._y;
-  }
-
-  set x(x) {
-    const oldX = this._x;
-    this._x = x;
-    if ( oldX !== x ) {
-      this.dungeon.update();
-    }
-  }
-
-  get x() {
-    return this._x;
-  }
-
   update() {
     const levelSize = this.dungeon.currentLevel.width;
-    const index = this.x + levelSize * this.y;
+    const index = this.newPos.x + levelSize * this.newPos.y;
     const world = this.dungeon.currentLevel.world;
 
     if (world[index] && world[index].damage) {
@@ -102,23 +81,29 @@ export class Player {
 
   draw(ctx) {
     const levelSize = this.dungeon.currentLevel.width;
-    let index = this.x + levelSize * this.y;
+    let index = Math.trunc(this.pos.x) + levelSize * Math.trunc(this.pos.y);
     const world = this.dungeon.currentLevel.world;
+
+    const posDiff = this.newPos.clone().sub(this.pos).length(false);
+    if (posDiff > 0.001) {
+      this.pos = Math.lerp(this.pos, this.newPos, 10 * Math.max(posDiff, 0.4) * (16 / 1000));
+    }
 
     if (this.inputUpdate) {
       this.inputUpdate = false;
+      let newIndex = Math.trunc(this.newPos.x) + levelSize * Math.trunc(this.newPos.y);
+      if (this.forward && world[newIndex - levelSize] && !world[newIndex - levelSize].solid) this.newPos.y--;
+      if (this.backward && world[newIndex + levelSize] && !world[newIndex + levelSize].solid) this.newPos.y++;
+      if (this.left && world[newIndex - 1] && !world[newIndex - 1].solid) this.newPos.x--;
+      if (this.right && world[newIndex + 1] && !world[newIndex + 1].solid) this.newPos.x++;
 
-      if (this.forward && world[index - levelSize] && !world[index - levelSize].solid) this.y--;
-      if (this.backward && world[index + levelSize] && !world[index + levelSize].solid) this.y++;
-      if (this.left && world[index - 1] && !world[index - 1].solid) this.x--;
-      if (this.right && world[index + 1] && !world[index + 1].solid) this.x++;
+      this.dungeon.update();
     }
-    index = this.x + levelSize * this.y;
 
-    this.dungeon.grid.offset.x = ctx.width / 2 - this.x * this.dungeon.grid.gridSize;
-    this.dungeon.grid.offset.y = ctx.height / 2 - this.y * this.dungeon.grid.gridSize;
+    this.dungeon.grid.offset.x = ctx.width / 2 - this.pos.x * this.dungeon.grid.gridSize;
+    this.dungeon.grid.offset.y = ctx.height / 2 - this.pos.y * this.dungeon.grid.gridSize;
 
-    const [ rx, ry ] = this.dungeon.grid.calcContextPos(this.x, this.y);
+    const [ rx, ry ] = this.dungeon.grid.calcContextPos(this.pos.x, this.pos.y);
     const size = this.dungeon.grid.gridSize;
     const offset = size * (1.0 - Player.PROPWIDTH) / 2;
     const width = size - 2 * offset;

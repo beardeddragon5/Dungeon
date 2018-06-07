@@ -27,8 +27,8 @@ export class Dungeon {
   }
 
   onSizeUpdate(width, height) {
-    this.grid.offset.x = this.player.x * this.grid.gridSize;
-    this.grid.offset.y = this.player.y * this.grid.gridSize;
+    this.grid.offset.x = this.player.pos.x * this.grid.gridSize;
+    this.grid.offset.y = this.player.pos.y * this.grid.gridSize;
   }
 
   update() {
