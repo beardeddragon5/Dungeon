@@ -53,7 +53,7 @@ export class Player {
 
     let lastTime = 0;
     window.onkeydown = (e) => {
-      if (e.repeat || e.timeStamp - lastTime > 100) {
+      if ((e.repeat && e.timeStamp - lastTime > 40) || e.timeStamp - lastTime > 100) {
         onKeyDown(e);
         lastTime = e.timeStamp;
       }
