@@ -30,19 +30,23 @@ export class Player {
 
       switch(e.keyCode) {
       case Player.W:
-        if (world[newIndex - levelSize] && !world[newIndex - levelSize].solid) this.newPos.y--;
+        // if (world[newIndex - levelSize] && !world[newIndex - levelSize].solid)
+          this.newPos.y--;
         this.dungeon.update();
         break;
       case Player.S:
-        if (world[newIndex + levelSize] && !world[newIndex + levelSize].solid) this.newPos.y++;
+        // if (world[newIndex + levelSize] && !world[newIndex + levelSize].solid)
+          this.newPos.y++;
         this.dungeon.update();
         break;
       case Player.A:
-        if (world[newIndex - 1] && !world[newIndex - 1].solid) this.newPos.x--;
+        // if (world[newIndex - 1] && !world[newIndex - 1].solid)
+          this.newPos.x--;
         this.dungeon.update();
         break;
       case Player.D:
-        if (world[newIndex + 1] && !world[newIndex + 1].solid) this.newPos.x++;
+        // if (world[newIndex + 1] && !world[newIndex + 1].solid)
+          this.newPos.x++;
         this.dungeon.update();
         break;
       default:

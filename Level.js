@@ -1,40 +1,85 @@
 
-export class Level {
+import { vec } from './Vector.js'
+import { Room } from './Room.js'
 
-  static get WALL() { return { c: '#777', solid: true }; }
-  static get FLOOR() { return { c: '#AAA', solid: false }; }
-  static get SPAWN() { return { c: '#0F0', solid: false }; }
-  static get LAVA() { return { c: '#D44', solid: false, damage: 10 }; }
+export class Level {
 
   constructor(dungeon) {
     this.dungeon = dungeon;
-    this.width = 32;
-    this.height = 10;
-    this.spawn = {
-      x: 4,
-      y: 4
-    };
-    this.generateLevel();
+    this.world = [];
+    this._generateLevel();
   }
 
-  generateLevel() {
-    const CHANCE_FLOOR = 1; // 0.8;
+  _isOccupied(width, height, pos) {
+    return (room) => {
+      return ((Math.abs(room.pos.x - pos.x) * 2 < (room.width + width)) &&
+         (Math.abs(room.pos.y - pos.y) * 2 < (room.height + height)));
+    };
+  }
 
-    this.world = [];
-    this.world[this.spawn.x + this.spawn.y * this.width] = Level.SPAWN;
-    for (let x = 0; x < this.width; x++) {
-      this.world[x] = Level.WALL;
-      this.world[x + this.width * this.height] = Level.WALL;
-    }
-    for (let y = 0; y < this.height; y++) {
-      this.world[y * this.width] = Level.WALL;
-      this.world[y * this.width + this.width - 1] = Level.WALL;
-    }
-    for (let i = 0; i < this.width * this.height; i++) {
-      if (!this.world[i]) {
-        this.world[i] = Math.random() < CHANCE_FLOOR ? Level.FLOOR : Level.LAVA;
+  _maxWidth(rooms)  {
+    return rooms.map(r => r.pos.x + r.width).reduce((max, current) => current > max ? current : max, 0);
+  }
+
+  _maxHeight(rooms)  {
+    return rooms.map(r => r.pos.y + r.height).reduce((max, current) => current > max ? current : max, 0);
+  }
+
+  _generatePosition(rooms, width, height) {
+    const maxWidth = this._maxWidth(rooms);
+    const maxHeight = this._maxHeight(rooms);
+
+    let pos;
+    let isOccupied;
+    do {
+      const x = Math.trunc(Math.random() * (maxWidth + width));
+      const y = Math.trunc(Math.random() * (maxHeight + height));
+      pos = vec(x, y);
+      isOccupied = this._isOccupied(width, height, pos);
+    } while(rooms.find(isOccupied));
+
+    return pos;
+  }
+
+  _applyRoom(maxWidth) {
+    return (room) => {
+      for (let y = 0; y < room.height; y++ ) {
+        const wy = room.pos.y + y;
+        for (let x = 0; x < room.width; x++ ) {
+          const wx = room.pos.x + x;
+          this.world[wx + wy * maxWidth] = room.tiles[ x + y * room.width];
+        }
       }
+    };
+  }
+
+  _generateLevel() {
+    const roomCount = 4;
+    const rooms = [];
+
+    for (let i = 0; i < roomCount; i++) {
+      const width = Math.trunc(Math.random() * 10 + 5);
+      const height = Math.trunc(Math.random() * 10 + 5);
+      const pos = this._generatePosition(rooms, width, height);
+
+      let room = new Room(width, height, pos);
+      room.generateRoom();
+      rooms.push(room);
     }
+
+    const maxWidth = this._maxWidth(rooms);
+    const maxHeight = this._maxHeight(rooms);
+
+    this.width = maxWidth;
+    this.height = maxHeight;
+
+    const applyRoom = this._applyRoom(maxWidth);
+    rooms.forEach(applyRoom);
+
+    let idx = this.world.findIndex(tile => tile && !tile.solid);
+    const x = idx % this.width;
+    const y = Math.floor(idx / this.width);
+    this.spawn = vec(x, y);
   }
 
   update() {
