@@ -1,14 +1,14 @@
-/* global setInterval */
-
 import { Level } from './Level.js';
 import { Player } from './Player.js';
 import { Grid } from './Grid.js';
 
 export class Dungeon {
 
-  static get GRIDSIZE( ) { const g = 40; return g; }
-  static get MS_PER_FRAME() { const g = 16; return g; }
-  static get SECOND_IN_MS() { const g = 1000; return g; }
+  /* eslint-disable no-magic-numbers */
+  static get GRIDSIZE() { return 40; }
+  static get MS_PER_FRAME() { return 16; }
+  static get SECOND_IN_MS() { return 1000; }
+  /* eslint-enable no-magic-numbers */
 
   constructor() {
     this.currentLevel = new Level(this);
@@ -28,7 +28,7 @@ export class Dungeon {
       this.player.draw(ctx, tpf);
 
       const now = Date.now();
-      tpf = (now - lastTime) / 1000;
+      tpf = (now - lastTime) / Dungeon.SECOND_IN_MS;
       lastTime = now;
     }, 1);
   }

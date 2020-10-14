@@ -1,5 +1,5 @@
 
-import { Tiles } from './Tiles.js'
+import { Tiles } from './Tiles.js';
 
 function normalRoom() {
   for (let x = 0; x < this.width; x++) {

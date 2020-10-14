@@ -1,18 +1,14 @@
-/* global window, location */
-
 import { vec } from './Vector.js';
+import * as keyboard from './util/keyboard.js';
 
 export class Player {
 
-  static get PROPWIDTH() { const g = 0.7; return g; }
-  static get INPUT_UPDATE_INTERVAL() { const g = 150; return g; }
+  /* eslint-disable no-magic-numbers */
+  static get PROPWIDTH() { return 0.7; }
+  static get INPUT_UPDATE_INTERVAL() { return 150; }
   static get GAME_OVER_TEXT() { return 'GAM3 0V3R'; }
-  static get VELOCITY() { const g = 4; return g; }
-
-  static get W(){ const g = 87; return g; }
-  static get S(){ const g = 83; return g; }
-  static get D(){ const g = 68; return g; }
-  static get A(){ const g = 65; return g; }
+  static get VELOCITY() { return 4; }
+  /* eslint-enable no-magic-numbers */
 
   constructor(dungeon, x, y) {
     this.dungeon = dungeon;
@@ -20,47 +16,53 @@ export class Player {
     this.pos = vec(x, y);
     this.maxHealth = 100;
     this.health = 100;
+    this.acceptInput = true;
 
     this.newPos = this.pos.clone();
 
     const onKeyDown = (e) => {
       const levelSize = this.dungeon.currentLevel.width;
-      const newIndex = Math.trunc(this.newPos.x) + levelSize * Math.trunc(this.newPos.y);
-      const world = this.dungeon.currentLevel.world;
+      const currentPosition = Math.trunc(this.newPos.x) + levelSize * Math.trunc(this.newPos.y);
+      const level = this.dungeon.currentLevel;
 
+      let update = true;
       switch(e.keyCode) {
-      case Player.W:
-        // if (world[newIndex - levelSize] && !world[newIndex - levelSize].solid)
+      case keyboard.W:
+        if (!level.tile(currentPosition - levelSize).solid) {
+          this.acceptInput = false;
           this.newPos.y--;
-        this.dungeon.update();
+        }
         break;
-      case Player.S:
-        // if (world[newIndex + levelSize] && !world[newIndex + levelSize].solid)
+      case keyboard.S:
+        if (!level.tile(currentPosition + levelSize).solid) {
+          this.acceptInput = false;
           this.newPos.y++;
-        this.dungeon.update();
+        }
         break;
-      case Player.A:
-        // if (world[newIndex - 1] && !world[newIndex - 1].solid)
+      case keyboard.A:
+        if (!level.tile(currentPosition - 1).solid) {
+          this.acceptInput = false;
           this.newPos.x--;
-        this.dungeon.update();
+        }
         break;
-      case Player.D:
-        // if (world[newIndex + 1] && !world[newIndex + 1].solid)
+      case keyboard.D:
+        if (!level.tile(currentPosition + 1).solid) {
+          this.acceptInput = false;
           this.newPos.x++;
-        this.dungeon.update();
+        }
         break;
       default:
+        update = false;
         break;
+      }
+      if (update) {
+        this.dungeon.update();
       }
     };
 
-    const threshold = (1000 / Player.VELOCITY) * 0.9;
-    let lastTime = -threshold;
     window.onkeydown = (e) => {
-      const duration = (e.timeStamp - lastTime);
-      if (duration > threshold) {
+      if (this.acceptInput) {
         onKeyDown(e);
-        lastTime = e.timeStamp;
       }
     };
   }
@@ -81,7 +83,11 @@ export class Player {
 
     const afterDelta = this.newPos.clone().sub(this.pos);
     const cross = Math.sign(deltaX.cross(afterDelta));
-    if ( Object.is(cross, -0) || Object.is(cross, -1) ) {
+
+    // check if player is at new specific position
+    // eslint-disable-next-line no-magic-numbers
+    if (Object.is(cross, -0) || Object.is(cross, -1)) {
+      this.acceptInput = true;
       this.pos = this.newPos.clone();
     }
 
@@ -89,10 +95,11 @@ export class Player {
     this.dungeon.grid.offset.y = ctx.height / 2 - this.pos.y * this.dungeon.grid.gridSize;
 
     const [ rx, ry ] = this.dungeon.grid.calcContextPos(this.pos.x, this.pos.y);
-    const size = this.dungeon.grid.gridSize;
-    const offset = size * (1.0 - Player.PROPWIDTH) / 2;
-    const width = size - 2 * offset;
-    const height = size;
+    const tileSize = this.dungeon.grid.gridSize;
+
+    const offset = tileSize * (1.0 - Player.PROPWIDTH) / 2;
+    const width = tileSize * Player.PROPWIDTH;
+    const height = tileSize;
 
     ctx.fillStyle = 'brown';
     ctx.fillRect(rx + offset, ry - offset, width, height);
@@ -131,6 +138,7 @@ export class Player {
 
   drawGameOver(ctx) {
     const TEXT_PADDING = 10;
+    const TEXT_OFFSET = 0.8;
 
     const fontSize = ctx.width / Player.GAME_OVER_TEXT.length;
     ctx.textAlign = 'center';
@@ -142,7 +150,8 @@ export class Player {
     width += TEXT_PADDING;
 
     ctx.fillStyle = '#444';
-    ctx.fillRect(ctx.width / 2 - width / 2, ctx.height / 2 - height * 0.8, width, height)
+
+    ctx.fillRect(ctx.width / 2 - width / 2, ctx.height / 2 - height * TEXT_OFFSET, width, height);
     ctx.fillStyle = 'white';
     ctx.fillText(Player.GAME_OVER_TEXT, ctx.width / 2, ctx.height / 2);
   }

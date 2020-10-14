@@ -1,5 +1,5 @@
 
-import { rooms } from './rooms.js'
+import { rooms } from './rooms.js';
 
 export class Room {
 
@@ -11,7 +11,7 @@ export class Room {
   }
 
   generateRoom() {
-    let generator = rooms[Math.trunc(Math.random() * rooms.length)];
+    const generator = rooms[Math.trunc(Math.random() * rooms.length)];
     generator.apply(this);
   }
 
