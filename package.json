@@ -1,0 +1,33 @@
+{
+  "name": "dungeon",
+  "version": "1.0.0",
+  "description": "Simple Dungeon Crawler",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm run lint",
+    "start": "http-server src/",
+    "lint": "eslint \"src/**/*.js\"",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beardeddragon5/Dungeon.git"
+  },
+  "keywords": [
+    "dungeon",
+    "game",
+    "hacktoberfest"
+  ],
+  "author": "Matthias Ramsauer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/beardeddragon5/Dungeon/issues"
+  },
+  "homepage": "https://github.com/beardeddragon5/Dungeon#readme",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.11.0"
+  }
+}

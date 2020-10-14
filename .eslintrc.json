@@ -1,8 +1,8 @@
 {
     "env": {
         "es6": true,
-        "node": false
-
+        "node": false,
+        "browser": true
     },
     "parserOptions": {
         "sourceType": "module"
